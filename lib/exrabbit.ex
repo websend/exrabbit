@@ -91,6 +91,9 @@ defmodule Exrabbit.Utils do
 	def publish(channel, exchange, routing_key, message) do
 		:amqp_channel.call channel, :'basic.publish'[exchange: exchange, routing_key: routing_key], :amqp_msg[payload: message]
 	end
+	def publish(channel, exchange, routing_key, message, properties) do
+                :amqp_channel.call channel, :'basic.publish'[exchange: exchange, routing_key: routing_key], :amqp_msg[payload: message, properties: properties]
+        end
 	def ack(channel, tag) do
 		:amqp_channel.call channel, :'basic.ack'[delivery_tag: tag]
 	end
