@@ -92,8 +92,8 @@ defmodule Exrabbit.Utils do
 		:amqp_channel.call channel, :'basic.publish'[exchange: exchange, routing_key: routing_key], :amqp_msg[payload: message]
 	end
 	def publish(channel, exchange, routing_key, message, properties) do
-                :amqp_channel.call channel, :'basic.publish'[exchange: exchange, routing_key: routing_key], :amqp_msg[payload: message, props: :'P_basic'[properties]]
-        end
+    :amqp_channel.call channel, :'basic.publish'[exchange: exchange, routing_key: routing_key], :amqp_msg[payload: message, props: :'P_basic'.new(properties)]
+  end
 	def ack(channel, tag) do
 		:amqp_channel.call channel, :'basic.ack'[delivery_tag: tag]
 	end
@@ -152,6 +152,15 @@ defmodule Exrabbit.Utils do
 	def parse_message(:'exchange.bind_ok'[]), do: nil
 	def parse_message(:'exchange.unbind_ok'[]), do: nil
 	def parse_message(:'basic.qos_ok'[]), do: nil
+
+	def parse_message_with_props({:'basic.deliver'[delivery_tag: tag], :amqp_msg[payload: payload, props: props]}), do: {tag, payload, props}
+	def parse_message_with_props(:'basic.cancel_ok'[]), do: nil
+	def parse_message_with_props(:'basic.consume_ok'[]), do: nil
+	def parse_message_with_props(:'exchange.declare_ok'[]), do: nil
+	def parse_message_with_props(:'exchange.delete_ok'[]), do: nil
+	def parse_message_with_props(:'exchange.bind_ok'[]), do: nil
+	def parse_message_with_props(:'exchange.unbind_ok'[]), do: nil
+	def parse_message_with_props(:'basic.qos_ok'[]), do: nil
 
 	def subscribe(channel, queue), do: subscribe(channel, queue, self)
 	def subscribe(channel, queue, pid) do
