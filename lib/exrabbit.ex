@@ -134,10 +134,15 @@ defmodule Exrabbit.Utils do
 		exchange
 	end
 	
-	def declare_exchange(channel, exchange, autodelete) do
+	def declare_exchange(channel, exchange, autodelete) when is_boolean(autodelete) do
 		:'exchange.declare_ok'[] = :amqp_channel.call channel, :'exchange.declare'[exchange: exchange, auto_delete: autodelete]
 		exchange
 	end
+
+  def declare_exchange(channel, exchange, opts) when is_list(opts) do
+    opts = Enum.concat [exchange: exchange], opts
+		:'exchange.declare_ok'[] = :amqp_channel.call channel, :'exchange.declare'.new(opts)
+  end
 	
 	def set_qos(channel, prefetch_count // 1) do
 		:'basic.qos_ok'[] = :amqp_channel.call channel, :'basic.qos'[prefetch_count: prefetch_count]

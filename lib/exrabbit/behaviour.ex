@@ -12,6 +12,10 @@ defmodule Exrabbit.Subscriber do
           {_, nil}   -> subscribe channel, args[:queue]
           {nil, _}   ->
             queue = declare_queue channel
+            case args[:exchange_opts] do
+              nil -> nil
+              list -> declare_exchange channel, args[:exchange], args[:exchange_opts]
+            end
             bind_queue channel, queue, args[:exchange]
             subscribe channel, queue 
         end
