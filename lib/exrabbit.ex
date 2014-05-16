@@ -1,3 +1,4 @@
+require Record
 defmodule Exrabbit do
   use Application.Behaviour
 
@@ -7,7 +8,7 @@ defmodule Exrabbit do
 end
 
 defmodule Exrabbit.Framing do
-	defrecord :'P_basic', Record.extract(:'P_basic', from_lib: "rabbit_common/include/rabbit_framing.hrl")
+	defrecord :'P_basic', Record.Extractor.extract(:'P_basic', from_lib: "rabbit_common/include/rabbit_framing.hrl")
 end
 
 defmodule Exrabbit.Defs do
@@ -17,9 +18,9 @@ defmodule Exrabbit.Defs do
 	@rabbit_framing "rabbit_common/include/rabbit_framing.hrl"
 	@amqp_client "amqp_client/include/amqp_client.hrl"
 
-	defrecord :amqp_params_network, Record.extract(:amqp_params_network, from_lib: @amqp_client)
-	defrecord :'basic.publish', Record.extract(:'basic.publish', from_lib: @rabbit_framing)
-	lc record inlist [
+	defrecord :amqp_params_network, Record.Extractor.extract(:amqp_params_network, from_lib: @amqp_client)
+	defrecord :'basic.publish', Record.Extractor.extract(:'basic.publish', from_lib: @rabbit_framing)
+	for record <- [
 		:'queue.declare',
 		:'queue.declare_ok',
 		:'queue.bind',
@@ -44,7 +45,7 @@ defmodule Exrabbit.Defs do
 		:'basic.qos', 
 		:'basic.qos_ok'
 		 ] do
-			defrecord record, Record.extract(record, from_lib: @rabbit_common)
+			defrecord record, Record.Extractor.extract(record, from_lib: @rabbit_common)
 	end
 	defrecord :amqp_msg, [props: :'P_basic'[], payload: ""]
 end
@@ -130,7 +131,7 @@ defmodule Exrabbit.Utils do
 		queue
 	end
 
-	def bind_queue(channel, queue, exchange, key // "") do
+	def bind_queue(channel, queue, exchange, key \\ "") do
 		:'queue.bind_ok'[] = :amqp_channel.call channel, :'queue.bind'[queue: queue, exchange: exchange, routing_key: key]		
 	end
 	
@@ -151,7 +152,7 @@ defmodule Exrabbit.Utils do
 		exchange
 	end
 
-	def set_qos(channel, prefetch_count // 1) do
+	def set_qos(channel, prefetch_count \\ 1) do
 		:'basic.qos_ok'[] = :amqp_channel.call channel, :'basic.qos'[prefetch_count: prefetch_count]
 		prefetch_count
 	end
